@@ -46,16 +46,11 @@ class Graf {
 
     V *searchV(V *Head, int name) {
         if (Head != nullptr) {
-            while (Head->next != nullptr) {
+            while (Head != nullptr) {
                 if (Head->name == name) {
                     return Head;
                 }
                 Head = Head->next;
-            }
-            if (Head->name == name) {
-                return Head;
-            } else {
-                return nullptr;
             }
         } else {
             return nullptr;
