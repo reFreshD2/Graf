@@ -19,16 +19,12 @@ class Graf {
     bool isInV(V *Head, int name) {
         bool isIn = false;
         if (Head != nullptr) {
-            while (Head->next != nullptr) {
+            while (Head != nullptr) {
                 if (Head->name == name) {
                     isIn = true;
                     return isIn;
                 }
                 Head = Head->next;
-            }
-            if (Head->next == nullptr && Head->name == name) {
-                isIn = true;
-                return isIn;
             }
         }
         return isIn;
@@ -37,7 +33,7 @@ class Graf {
     bool isInAdj(adj *Head, int name) {
         bool isIn = false;
         if (Head != nullptr) {
-            while (Head->next != nullptr) {
+            while (Head != nullptr) {
                 if (Head->name->name == name) {
                     isIn = true;
                     return isIn;
