@@ -62,6 +62,19 @@ public:
         H = nullptr;
     }
 
+    ~Graf() {
+        V *temp = H;
+        while (temp != nullptr) {
+            adj *temp2 = temp->E;
+            while (temp2 != nullptr) {
+                temp2 = temp2->next;
+                delete temp2;
+            }
+            temp = temp->next;
+            delete temp;
+        }
+    }
+
     int addV(int name) {
         if (!isInV(H, name)) {
             V *temp = new V;
@@ -170,8 +183,8 @@ public:
                     while (adj1->next->name->name != v2 && adj1->next != nullptr) {
                         adj1 = adj1->next;
                     }
-                    adj1->next = adj1->next->next; //удаление внутри
                     delete adj1->next;
+                    adj1->next = adj1->next->next; //удаление внутри
                 }
                 if (adj2->name->name == v1) {
                     temp2->E = adj2->next;
@@ -180,8 +193,8 @@ public:
                     while (adj2->next->name->name != v1 && adj2->next != nullptr) {
                         adj2 = adj2->next;
                     }
-                    adj2->next = adj2->next->next;
                     delete adj2->next;
+                    adj2->next = adj2->next->next;
                 }
             } else {
                 return 2; // есть вершины, но нет ребра
@@ -207,8 +220,8 @@ public:
                 while (temp->next->name != v1 && temp->next != nullptr) {
                     temp = temp->next;
                 }
-                temp->next = temp->next->next;
                 delete temp->next;
+                temp->next = temp->next->next;
             }
         } else {
             return 1; // нет вершины v1 в графе
@@ -218,17 +231,21 @@ public:
 
     void print() {
         V *temp = H;
-        while (temp != nullptr) {
-            cout << temp->name << " : ";
-            adj *temp2 = temp->E;
-            while (temp2 != nullptr) {
-                cout << temp2->name->name << ' ';
-                temp2 = temp2->next;
+        if (temp == nullptr) {
+            cout << "Graph is empty" << endl;
+        } else {
+            while (temp != nullptr) {
+                cout << temp->name << " : ";
+                adj *temp2 = temp->E;
+                while (temp2 != nullptr) {
+                    cout << temp2->name->name << ' ';
+                    temp2 = temp2->next;
+                }
+                cout << endl;
+                temp = temp->next;
             }
-            cout << endl;
-            temp = temp->next;
+            cout << "----------------------------------" << endl;
         }
-        cout << "----------------------------------" << endl;
     }
 };
 
@@ -236,9 +253,13 @@ int main() {
     setlocale(LC_ALL, "Russian");
     Graf graf1;
     graf1.addV(2) == 1; // добавление в пустой
+    graf1.print();
     graf1.addV(4) == 1; // добавление в конец
+    graf1.print();
     graf1.addV(1) == 1;// добавление в начало
+    graf1.print();
     graf1.addV(3) == 1;// добавление в середину
+    graf1.print();
     if (graf1.addV(2) == 1) {
         cout << "Duplicate nodes" << endl;
     }; // добавление повтора
@@ -252,14 +273,18 @@ int main() {
         cout << "Haven't nodes v1 or v2" << endl;
     }; // нет вершин v1 и v2
     graf1.addE(1, 2); // добавление в пустой
+    graf1.print();
     graf1.addE(1, 4); // добавление в конец
+    graf1.print();
     graf1.addE(1, 1); // добавление в начало
+    graf1.print();
     graf1.addE(1, 3); // добавление в середину
+    graf1.print();
     if (graf1.addE(1, 2) == 2) {
         cout << "The edge (v1,v2) is already in the graph" << endl;
     } // добавление повторяющегося ребра
-    graf1.print();
     graf1.delE(1, 4); // удаление с начала и в середине
+    graf1.print();
     if (graf1.delE(1, 5) == 1) { // удаление ребра с несуществующей вершиной
         cout << "Haven't nodes v1 or v2" << endl;
     }
@@ -269,11 +294,10 @@ int main() {
     if (graf1.delE(1, 4) == 2) { // удаление не существующего ребра
         cout << "No edges (v1,v2) in the graph" << endl;
     }
-    graf1.print();
     graf1.delV(3); // удаление существующей вершины
+    graf1.print();
     if (graf1.delV(3) == 1) {
         cout << "Haven't node v1" << endl;
     }
-    graf1.print();
     return 0;
 }
