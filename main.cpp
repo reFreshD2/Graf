@@ -1,16 +1,24 @@
 #include <iostream>
+#include <queue>
 
 using namespace std;
+
+enum status {
+    notMarked, markedButNotVisited, visited
+};
 struct adj;
 struct V {
     int name;
     V *next;
     adj *E = nullptr;
+    bool marked = false;
+    status visited = notMarked;
 };
 
 struct adj {
     V *name;
     adj *next;
+    bool marked = false;
 };
 
 class Graf {
@@ -147,27 +155,41 @@ public:
             V *temp1 = searchVPointer(v1);
             V *temp2 = searchVPointer(v2);
             if (searchE(v1, v2) && searchE(v2, v1)) {
-                adj *adj1 = temp1->E;
-                adj *adj2 = temp2->E;
-                if (adj1->name->name == v2) {
-                    temp1->E = adj1->next; // удаление с начала
-                    delete adj1;
-                } else {
-                    while (adj1->next->name->name != v2 && adj1->next != nullptr) {
-                        adj1 = adj1->next;
+                if (v1 != v2) {
+                    adj *adj1 = temp1->E;
+                    adj *adj2 = temp2->E;
+                    if (adj1->name->name == v2) {
+                        temp1->E = adj1->next; // удаление с начала
+                        delete adj1;
+                    } else {
+                        while (adj1->next->name->name != v2 && adj1->next != nullptr) {
+                            adj1 = adj1->next;
+                        }
+                        delete adj1->next;
+                        adj1->next = adj1->next->next; //удаление внутри
                     }
-                    delete adj1->next;
-                    adj1->next = adj1->next->next; //удаление внутри
-                }
-                if (adj2->name->name == v1) {
-                    temp2->E = adj2->next;
-                    delete adj2;
-                } else {
-                    while (adj2->next->name->name != v1 && adj2->next != nullptr) {
-                        adj2 = adj2->next;
+                    if (adj2->name->name == v1) {
+                        temp2->E = adj2->next;
+                        delete adj2;
+                    } else {
+                        while (adj2->next->name->name != v1 && adj2->next != nullptr) {
+                            adj2 = adj2->next;
+                        }
+                        delete adj2->next;
+                        adj2->next = adj2->next->next;
                     }
-                    delete adj2->next;
-                    adj2->next = adj2->next->next;
+                } else {
+                    adj *adj1 = temp1->E;
+                    if (adj1->name->name == v2) {
+                        temp1->E = adj1->next; // удаление с начала
+                        delete adj1;
+                    } else {
+                        while (adj1->next->name->name != v2 && adj1->next != nullptr) {
+                            adj1 = adj1->next;
+                        }
+                        delete adj1->next;
+                        adj1->next = adj1->next->next; //удаление внутри
+                    }
                 }
             } else {
                 return 2; // есть вершины, но нет ребра
@@ -223,7 +245,7 @@ public:
 
     bool searchV(int name) {
         bool isIn = false;
-        V* Head = H;
+        V *Head = H;
         if (Head != nullptr) {
             while (Head != nullptr) {
                 if (Head->name == name) {
@@ -250,29 +272,90 @@ public:
         }
         return isIn;
     }
+
+    void visitV1(int p) {
+        queue<int> S;
+        S.push(p);
+        V *pointerP = searchVPointer(p);
+        pointerP->marked = true;
+        while (!S.empty()) {
+            int q = S.front();
+            cout << q << " ";
+            S.pop();
+            adj *receiver = searchVPointer(q)->E;
+            while (receiver != nullptr) {
+                if (!receiver->name->marked) {
+                    receiver->name->marked = true;
+                    S.push(receiver->name->name);
+                }
+                receiver = receiver->next;
+            }
+        }
+    }
+
+    void visitV2(int p) {
+        queue<int> Q;
+        Q.push(p);
+        V *pointerP = searchVPointer(p);
+        pointerP->visited = markedButNotVisited;
+        while (!Q.empty()) {
+            int q = Q.front();
+            cout << q << " ";
+            Q.pop();
+            V *pointerQ = searchVPointer(q);
+            adj *w = pointerQ->E;
+            while (w != nullptr) {
+                w->marked = true;
+                V *end = w->name;
+                if (end->visited == notMarked) {
+                    end->visited = markedButNotVisited;
+                    Q.push(end->name);
+                }
+                w = w->next;
+            }
+            pointerQ->visited = visited;
+        }
+    }
 };
 
 int main() {
     setlocale(LC_ALL, "Russian");
     Graf g;
-
-    for (int i=1;i<10;i++) {
+    /*
+    for (int i = 1; i < 10; i++) {
         g.addV(i);
-        g.addV(10-i);
+        g.addV(10 - i);
     }
-    for (int i=1;i<10;i++) {
+    for (int i = 1; i < 10; i++) {
         for (int j = 1; j < 10; j++) {
-g.addE(i,j);
+            g.addE(i, j);
         }
     }
 
-cout<<endl;
+    cout << endl;
     g.print();
 
-    for(int i=1;i<10;i=i+2)
-        g.delE(i,i);
+    for (int i = 1; i < 10; i = i + 2)
+        g.delE(i, i);
 
-    cout<<endl;
+    cout << endl;
+    g.print();*/
+    for (int i = 1; i < 9; i++)
+        g.addV(i);
+    g.addE(1, 2);
+    g.addE(1, 3);
+    g.addE(1, 4);
+    g.addE(2, 8);
+    g.addE(3, 7);
+    g.addE(4, 7);
+    g.addE(4, 5);
+    g.addE(2, 5);
+    g.addE(8, 6);
+    g.addE(6, 7);
+    g.addE(6, 5);
     g.print();
+    g.visitV1(1);
+    cout << endl;
+    g.visitV2(1);
     return 0;
 }
