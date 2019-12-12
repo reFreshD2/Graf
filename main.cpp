@@ -2,23 +2,17 @@
 #include <queue>
 
 using namespace std;
-
-enum status {
-    notMarked, markedButNotVisited, visited
-};
 struct adj;
 struct V {
     int name;
     V *next;
     adj *E = nullptr;
     bool marked = false;
-    status visited = notMarked;
 };
 
 struct adj {
     V *name;
     adj *next;
-    bool marked = false;
 };
 
 class Graf {
@@ -160,34 +154,34 @@ public:
                     adj *adj2 = temp2->E;
                     if (adj1->name->name == v2) {
                         temp1->E = adj1->next; // удаление с начала
-                        delete adj1;
+                        //delete adj1;
                     } else {
                         while (adj1->next->name->name != v2 && adj1->next != nullptr) {
                             adj1 = adj1->next;
                         }
-                        delete adj1->next;
+                        //delete adj1->next;
                         adj1->next = adj1->next->next; //удаление внутри
                     }
                     if (adj2->name->name == v1) {
                         temp2->E = adj2->next;
-                        delete adj2;
+                        //delete adj2;
                     } else {
                         while (adj2->next->name->name != v1 && adj2->next != nullptr) {
                             adj2 = adj2->next;
                         }
-                        delete adj2->next;
+                        //delete adj2->next;
                         adj2->next = adj2->next->next;
                     }
                 } else {
                     adj *adj1 = temp1->E;
                     if (adj1->name->name == v2) {
                         temp1->E = adj1->next; // удаление с начала
-                        delete adj1;
+                        //delete adj1;
                     } else {
                         while (adj1->next->name->name != v2 && adj1->next != nullptr) {
                             adj1 = adj1->next;
                         }
-                        delete adj1->next;
+                        //delete adj1->next;
                         adj1->next = adj1->next->next; //удаление внутри
                     }
                 }
@@ -210,12 +204,12 @@ public:
             temp = H;
             if (temp->name == v1) {
                 H = temp->next;
-                delete temp;
+                //delete temp;
             } else {
                 while (temp->next->name != v1 && temp->next != nullptr) {
                     temp = temp->next;
                 }
-                delete temp->next;
+                //delete temp->next;
                 temp->next = temp->next->next;
             }
         } else {
@@ -273,7 +267,7 @@ public:
         return isIn;
     }
 
-    void visitV1(int p) {
+    void visit(int p) {
         queue<int> S;
         S.push(p);
         V *pointerP = searchVPointer(p);
@@ -292,36 +286,12 @@ public:
             }
         }
     }
-
-    void visitV2(int p) {
-        queue<int> Q;
-        Q.push(p);
-        V *pointerP = searchVPointer(p);
-        pointerP->visited = markedButNotVisited;
-        while (!Q.empty()) {
-            int q = Q.front();
-            cout << q << " ";
-            Q.pop();
-            V *pointerQ = searchVPointer(q);
-            adj *w = pointerQ->E;
-            while (w != nullptr) {
-                w->marked = true;
-                V *end = w->name;
-                if (end->visited == notMarked) {
-                    end->visited = markedButNotVisited;
-                    Q.push(end->name);
-                }
-                w = w->next;
-            }
-            pointerQ->visited = visited;
-        }
-    }
 };
 
 int main() {
     setlocale(LC_ALL, "Russian");
     Graf g;
-    /*
+
     for (int i = 1; i < 10; i++) {
         g.addV(i);
         g.addV(10 - i);
@@ -339,23 +309,23 @@ int main() {
         g.delE(i, i);
 
     cout << endl;
-    g.print();*/
-    for (int i = 1; i < 9; i++)
-        g.addV(i);
-    g.addE(1, 2);
-    g.addE(1, 3);
-    g.addE(1, 4);
-    g.addE(2, 8);
-    g.addE(3, 7);
-    g.addE(4, 7);
-    g.addE(4, 5);
-    g.addE(2, 5);
-    g.addE(8, 6);
-    g.addE(6, 7);
-    g.addE(6, 5);
     g.print();
-    g.visitV1(1);
+    Graf g1;
+    for (int i = 1; i < 9; i++)
+        g1.addV(i);
+    g1.addE(1, 2);
+    g1.addE(1, 3);
+    g1.addE(1, 4);
+    g1.addE(2, 8);
+    g1.addE(3, 7);
+    g1.addE(4, 7);
+    g1.addE(4, 5);
+    g1.addE(2, 5);
+    g1.addE(8, 6);
+    g1.addE(6, 7);
+    g1.addE(6, 5);
+    g1.print();
+    g1.visit(1);
     cout << endl;
-    g.visitV2(1);
     return 0;
 }
