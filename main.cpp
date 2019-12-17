@@ -268,21 +268,23 @@ public:
     }
 
     void visit(int p) {
-        queue<int> S;
-        S.push(p);
-        V *pointerP = searchVPointer(p);
-        pointerP->marked = true;
-        while (!S.empty()) {
-            int q = S.front();
-            cout << q << " ";
-            S.pop();
-            adj *receiver = searchVPointer(q)->E;
-            while (receiver != nullptr) {
-                if (!receiver->name->marked) {
-                    receiver->name->marked = true;
-                    S.push(receiver->name->name);
+        if (searchV(p)) {
+            queue<int> S;
+            S.push(p);
+            V *pointerP = searchVPointer(p);
+            pointerP->marked = true;
+            while (!S.empty()) {
+                int q = S.front();
+                cout << q << " ";
+                S.pop();
+                adj *receiver = searchVPointer(q)->E;
+                while (receiver != nullptr) {
+                    if (!receiver->name->marked) {
+                        receiver->name->marked = true;
+                        S.push(receiver->name->name);
+                    }
+                    receiver = receiver->next;
                 }
-                receiver = receiver->next;
             }
         }
     }
@@ -298,18 +300,30 @@ int main() {
     }
     for (int i = 1; i < 10; i++) {
         for (int j = 1; j < 10; j++) {
-            g.addE(i, j);
+            g.addE(i, 10 - j);
+            g.addE(10 - i, j);
         }
     }
 
     cout << endl;
     g.print();
 
-    for (int i = 1; i < 10; i = i + 2)
-        g.delE(i, i);
+    for (int i = 1; i < 10; i = i + 1)
+        g.delE(i, 10 - i);
 
     cout << endl;
     g.print();
+
+    for (int i = 1; i < 10; i++) {
+        for (int j = 1; j < 10; j++) {
+            g.addE(i, 10 - j);
+            g.addE(10 - i, j);
+        }
+    }
+
+    cout << endl;
+    g.print();
+
     Graf g1;
     for (int i = 1; i < 9; i++)
         g1.addV(i);
@@ -327,5 +341,14 @@ int main() {
     g1.print();
     g1.visit(1);
     cout << endl;
+
+    Graf g2;
+    for (int i = 1; i < 9; i++)
+        g2.addV(i);
+    for (int i = 1; i < 9; i++)
+        g2.addE(i, i + 2);
+    g2.print();
+    g2.visit(1);
+    g2.visit(10);
     return 0;
 }
