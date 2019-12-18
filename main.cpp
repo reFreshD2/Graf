@@ -1,5 +1,6 @@
 #include <iostream>
 #include <queue>
+#include <set>
 
 using namespace std;
 struct adj;
@@ -17,6 +18,7 @@ struct adj {
 
 class Graf {
     V *H;
+    set<int> compsub;
 
     V *searchVPointer(int name) {
         V *Head = H;
@@ -32,6 +34,44 @@ class Graf {
         }
     }
 
+    bool check (set<int> candidates,set<int> no) {
+        for (int i : no) {
+            for (int j : candidates) {
+                if (!this->searchE(i, j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    void extend (set<int> candidates,set<int> no) {
+        while (!candidates.empty() && check(candidates,no)){
+            int v = *candidates.begin();
+            compsub.insert(v);
+            candidates.erase(v);
+            set<int> new_candidates = candidates;
+            set<int> new_no = no;
+            V* temp = searchVPointer(v);
+            adj* temp2 = temp->E;
+            while (temp2 != nullptr) {
+                new_candidates.erase(temp2->name->name);
+                new_no.erase(temp2->name->name);
+                temp2 = temp2->next;
+            }
+            if (new_candidates.empty() && new_no.empty()) {
+                for (int i : compsub) {
+                    cout << i << " ";
+                }
+                cout << endl;
+            } else {
+                extend(new_candidates,new_no);
+            }
+            compsub.erase(v);
+            candidates.erase(v);
+            no.insert(v);
+        }
+    }
 public:
     Graf() {
         H = nullptr;
@@ -267,7 +307,7 @@ public:
         return isIn;
     }
 
-    void visit(int p) {
+    int visit(int p) {
         if (searchV(p)) {
             queue<int> S;
             S.push(p);
@@ -286,7 +326,21 @@ public:
                     receiver = receiver->next;
                 }
             }
+            cout << endl;
+            return 0;
         }
+        return 1;
+    }
+
+    void maxInd() {
+        set<int> candidates;
+        set<int> no;
+        V* temp = H;
+        while (temp != nullptr) {
+            candidates.insert(temp->name);
+            temp = temp->next;
+        }
+        extend(candidates,no);
     }
 };
 
@@ -349,6 +403,8 @@ int main() {
         g2.addE(i, i + 2);
     g2.print();
     g2.visit(1);
+    g2.print();
     g2.visit(10);
+    g2.maxInd();
     return 0;
 }
