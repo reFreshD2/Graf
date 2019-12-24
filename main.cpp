@@ -1,6 +1,4 @@
 #include <iostream>
-#include <queue>
-#include <set>
 
 using namespace std;
 struct adj;
@@ -18,15 +16,14 @@ struct adj {
 
 class Graf {
     V *H;
-    set<int> compsub;
 
-    int addToQueue (int v) {
+    int addToQueue(int v) {
         if (!searchV(v)) {
-            V* newV = new V;
+            V *newV = new V;
             newV->name = v;
             newV->next = nullptr;
             if (H != nullptr) {
-                V* temp = H;
+                V *temp = H;
                 while (temp->next != nullptr) {
                     temp = temp->next;
                 }
@@ -39,13 +36,20 @@ class Graf {
         return 1;
     }
 
-    int popFromQueue () {
+    int popFromQueue() {
         if (H != nullptr) {
             int pop = H->name;
-            V* temp = H->next;
+            V *temp = H->next;
             delete H;
             H = temp;
             return pop;
+        }
+        return -1;
+    }
+
+    int getFirst() {
+        if (H != nullptr) {
+            return H->name;
         }
         return -1;
     }
@@ -64,44 +68,50 @@ class Graf {
         }
     }
 
-    bool check (set<int> candidates,set<int> no) {
-        for (int i : no) {
-            for (int j : candidates) {
-                if (!this->searchE(i, j)) {
+    bool check(Graf candidates, Graf no) {
+        V *i = no.H;
+        V *j = candidates.H;
+        while (i) {
+            while (j) {
+                if (!this->searchE(i->name, j->name)) {
                     return false;
                 }
+                j = j->next;
             }
+            i = i->next;
         }
         return true;
     }
 
-    void extend (set<int> candidates,set<int> no) {
-        while (!candidates.empty() && check(candidates,no)){
-            int v = *candidates.begin();
-            compsub.insert(v);
-            set<int> new_candidates = candidates;
-            set<int> new_no = no;
-            new_candidates.erase(v);
-            V* temp = searchVPointer(v);
-            adj* temp2 = temp->E;
-            while (temp2 != nullptr) {
-                new_candidates.erase(temp2->name->name);
-                new_no.erase(temp2->name->name);
-                temp2 = temp2->next;
+    void extend(Graf compsub, Graf candidates, Graf no) {
+        while (candidates.H != nullptr && check(candidates, no)) {
+            int v = candidates.getFirst();
+            compsub.addV(v);
+            Graf new_candidates = candidates;
+            Graf new_no = no;
+            new_candidates.delV(v);
+            adj *temp = searchVPointer(v)->E;
+            while (temp != nullptr) {
+                new_candidates.delV(temp->name->name);
+                new_no.delV(temp->name->name);
+                temp = temp->next;
             }
-            if (new_candidates.empty() && new_no.empty()) {
-                for (int i : compsub) {
-                    cout << i << " ";
+            if (new_candidates.H == nullptr && new_no.H == nullptr) {
+                V *forPrint = compsub.H;
+                while (forPrint) {
+                    cout << forPrint->name << " ";
+                    forPrint = forPrint->next;
                 }
                 cout << endl;
             } else {
-                extend(new_candidates,new_no);
+                extend(compsub, new_candidates, new_no);
             }
-            compsub.erase(v);
-            candidates.erase(v);
-            no.insert(v);
+            compsub.delV(v);
+            candidates.delV(v);
+            no.addV(v);
         }
     }
+
 public:
     Graf() {
         H = nullptr;
@@ -341,12 +351,12 @@ public:
         if (searchV(p)) {
             Graf S;
             S.addToQueue(p);
-            V* pp = searchVPointer(p);
+            V *pp = searchVPointer(p);
             pp->marked = true;
             while (S.H != nullptr) {
                 int q = S.popFromQueue();
                 cout << q << " ";
-                adj* E = searchVPointer(q)->E;
+                adj *E = searchVPointer(q)->E;
                 while (E != nullptr) {
                     if (!E->name->marked) {
                         E->name->marked = true;
@@ -362,14 +372,32 @@ public:
     }
 
     void maxInd() {
-        set<int> candidates;
-        set<int> no;
-        V* temp = H;
+        Graf compsub;
+        Graf no;
+        Graf candidates;
+        V *temp = H;
         while (temp != nullptr) {
-            candidates.insert(temp->name);
+            candidates.addV(temp->name);
             temp = temp->next;
         }
-        extend(candidates,no);
+        extend(compsub, candidates, no);
+    }
+
+    Graf &operator=(const Graf &right) {
+        if (this == &right) {
+            return *this;
+        }
+        while (H) {
+            V *temp = H->next;
+            delete H;
+            H = temp;
+        }
+        V *rightDL = right.H;
+        while (rightDL != nullptr) {
+            addV(rightDL->name);
+            rightDL = rightDL->next;
+        }
+        return *this;
     }
 };
 
@@ -432,7 +460,6 @@ int main() {
         g2.addE(i, i + 2);
     g2.print();
     g2.visit(1);
-    g2.print();
     g2.visit(10);
     g2.maxInd();
     return 0;
