@@ -20,6 +20,36 @@ class Graf {
     V *H;
     set<int> compsub;
 
+    int addToQueue (int v) {
+        if (!searchV(v)) {
+            V* newV = new V;
+            newV->name = v;
+            newV->next = nullptr;
+            if (H != nullptr) {
+                V* temp = H;
+                while (temp->next != nullptr) {
+                    temp = temp->next;
+                }
+                temp->next = newV;
+            } else {
+                H = newV;
+            }
+            return 0;
+        }
+        return 1;
+    }
+
+    int popFromQueue () {
+        if (H != nullptr) {
+            int pop = H->name;
+            V* temp = H->next;
+            delete H;
+            H = temp;
+            return pop;
+        }
+        return -1;
+    }
+
     V *searchVPointer(int name) {
         V *Head = H;
         if (Head != nullptr) {
@@ -49,9 +79,9 @@ class Graf {
         while (!candidates.empty() && check(candidates,no)){
             int v = *candidates.begin();
             compsub.insert(v);
-            candidates.erase(v);
             set<int> new_candidates = candidates;
             set<int> new_no = no;
+            new_candidates.erase(v);
             V* temp = searchVPointer(v);
             adj* temp2 = temp->E;
             while (temp2 != nullptr) {
@@ -309,21 +339,20 @@ public:
 
     int visit(int p) {
         if (searchV(p)) {
-            queue<int> S;
-            S.push(p);
-            V *pointerP = searchVPointer(p);
-            pointerP->marked = true;
-            while (!S.empty()) {
-                int q = S.front();
+            Graf S;
+            S.addToQueue(p);
+            V* pp = searchVPointer(p);
+            pp->marked = true;
+            while (S.H != nullptr) {
+                int q = S.popFromQueue();
                 cout << q << " ";
-                S.pop();
-                adj *receiver = searchVPointer(q)->E;
-                while (receiver != nullptr) {
-                    if (!receiver->name->marked) {
-                        receiver->name->marked = true;
-                        S.push(receiver->name->name);
+                adj* E = searchVPointer(q)->E;
+                while (E != nullptr) {
+                    if (!E->name->marked) {
+                        E->name->marked = true;
+                        S.addToQueue(E->name->name);
                     }
-                    receiver = receiver->next;
+                    E = E->next;
                 }
             }
             cout << endl;
