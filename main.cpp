@@ -14,6 +14,8 @@ struct adj {
     adj *next;
 };
 
+struct maxInd;
+
 class Graf {
     V *H;
 
@@ -65,50 +67,6 @@ class Graf {
             }
         } else {
             return nullptr;
-        }
-    }
-
-    bool check(Graf candidates, Graf no) {
-        V *i = no.H;
-        V *j = candidates.H;
-        while (i) {
-            while (j) {
-                if (!this->searchE(i->name, j->name)) {
-                    return false;
-                }
-                j = j->next;
-            }
-            i = i->next;
-        }
-        return true;
-    }
-
-    void extend(Graf compsub, Graf candidates, Graf no) {
-        while (candidates.H != nullptr && check(candidates, no)) {
-            int v = candidates.getFirst();
-            compsub.addV(v);
-            Graf new_candidates = candidates;
-            Graf new_no = no;
-            new_candidates.delV(v);
-            adj *temp = searchVPointer(v)->E;
-            while (temp != nullptr) {
-                new_candidates.delV(temp->name->name);
-                new_no.delV(temp->name->name);
-                temp = temp->next;
-            }
-            if (new_candidates.H == nullptr && new_no.H == nullptr) {
-                V *forPrint = compsub.H;
-                while (forPrint) {
-                    cout << forPrint->name << " ";
-                    forPrint = forPrint->next;
-                }
-                cout << endl;
-            } else {
-                extend(compsub, new_candidates, new_no);
-            }
-            compsub.delV(v);
-            candidates.delV(v);
-            no.addV(v);
         }
     }
 
@@ -349,6 +307,11 @@ public:
 
     int visit(int p) {
         if (searchV(p)) {
+            V *temp = H;
+            while (temp) {
+                temp->marked = false;
+                temp = temp->next;
+            }
             Graf S;
             S.addToQueue(p);
             V *pp = searchVPointer(p);
@@ -371,16 +334,14 @@ public:
         return 1;
     }
 
-    void maxInd() {
-        Graf compsub;
-        Graf no;
-        Graf candidates;
+    void maxIndependent() {
+        Graf Qp;
         V *temp = H;
         while (temp != nullptr) {
-            candidates.addV(temp->name);
+            Qp.addV(temp->name);
             temp = temp->next;
         }
-        extend(compsub, candidates, no);
+        maxInd max;
     }
 
     Graf &operator=(const Graf &right) {
@@ -399,6 +360,14 @@ public:
         }
         return *this;
     }
+};
+
+struct maxInd {
+    int k;
+    Graf Qp;
+    Graf Qm;
+    Graf Sk;
+    maxInd *next = nullptr;
 };
 
 int main() {
@@ -450,10 +419,16 @@ int main() {
     g1.addE(6, 7);
     g1.addE(6, 5);
     g1.print();
-    g1.visit(1);
+    g1.visit(6);
+
     cout << endl;
 
-    Graf g2;
+
+    g1.delV(6);
+    g1.print();
+    g1.visit(5);
+
+    /*Graf g2;
     for (int i = 1; i < 9; i++)
         g2.addV(i);
     for (int i = 1; i < 9; i++)
@@ -461,6 +436,6 @@ int main() {
     g2.print();
     g2.visit(1);
     g2.visit(10);
-    g2.maxInd();
+    g2.maxInd();*/
     return 0;
 }
