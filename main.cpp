@@ -14,8 +14,6 @@ struct adj {
     adj *next;
 };
 
-struct maxInd;
-
 class Graf {
     V *H;
 
@@ -70,12 +68,70 @@ class Graf {
         }
     }
 
+    bool check(Graf Qp, Graf Qm) {
+        V* temp = Qm.H;
+        bool check = true;
+        while (temp != nullptr & check) {
+            V* temp2 = Qp.H;
+            bool check2 = false;
+            while (temp2 != nullptr) {
+                if (searchE(temp->name,temp2->name)) {
+                    check2 = true;
+                }
+                temp2 = temp2->next;
+            }
+            if (!check2) {
+                check = false;
+            }
+            temp = temp->next;
+        }
+        return check;
+    }
+
+    void extend(Graf Qp, Graf Qm, Graf Sk) {
+        while (Qp.H != nullptr && check(Qp, Qm)) {
+            int new_V = Qp.getFirst();
+            Sk.addV(new_V);
+            Graf new_Qp, new_Qm;
+            V* temp = Qp.H;
+            while (temp) {
+                new_Qp.addV(temp->name);
+                temp = temp->next;
+            }
+            temp = Qm.H;
+            while (temp) {
+                new_Qm.addV(temp->name);
+                temp = temp->next;
+            }
+            adj* adj_V = searchVPointer(new_V)->E;
+            while (adj_V != nullptr) {
+                new_Qp.delV(adj_V->name->name);
+                new_Qm.delV(adj_V->name->name);
+                adj_V = adj_V->next;
+            }
+            new_Qp.delV(new_V);
+            if (new_Qp.H == nullptr && new_Qm.H == nullptr){
+                V* temp = Sk.H;
+                while (temp != nullptr) {
+                    cout << temp->name << ' ';
+                    temp = temp->next;
+                }
+                cout << endl;
+            } else {
+                extend(new_Qp, new_Qm, Sk);
+            }
+            Qp.delV(new_V);
+            Sk.delV(new_V);
+            Qm.addV(new_V);
+        }
+    }
+
 public:
     Graf() {
         H = nullptr;
     }
 
-    ~Graf() {
+   ~Graf() {
         V *temp = H;
         while (temp != nullptr) {
             adj *temp2 = temp->E;
@@ -318,6 +374,7 @@ public:
             pp->marked = true;
             while (S.H != nullptr) {
                 int q = S.popFromQueue();
+                if (q == -1) { break; }
                 cout << q << " ";
                 adj *E = searchVPointer(q)->E;
                 while (E != nullptr) {
@@ -341,34 +398,11 @@ public:
             Qp.addV(temp->name);
             temp = temp->next;
         }
-        maxInd max;
-    }
-
-    Graf &operator=(const Graf &right) {
-        if (this == &right) {
-            return *this;
-        }
-        while (H) {
-            V *temp = H->next;
-            delete H;
-            H = temp;
-        }
-        V *rightDL = right.H;
-        while (rightDL != nullptr) {
-            addV(rightDL->name);
-            rightDL = rightDL->next;
-        }
-        return *this;
+        Graf Qm, Sk;
+        extend(Qp, Qm, Sk);
     }
 };
 
-struct maxInd {
-    int k;
-    Graf Qp;
-    Graf Qm;
-    Graf Sk;
-    maxInd *next = nullptr;
-};
 
 int main() {
     setlocale(LC_ALL, "Russian");
@@ -428,7 +462,7 @@ int main() {
     g1.print();
     g1.visit(5);
 
-    /*Graf g2;
+    Graf g2;
     for (int i = 1; i < 9; i++)
         g2.addV(i);
     for (int i = 1; i < 9; i++)
@@ -436,6 +470,6 @@ int main() {
     g2.print();
     g2.visit(1);
     g2.visit(10);
-    g2.maxInd();*/
+    g2.maxIndependent();
     return 0;
 }
